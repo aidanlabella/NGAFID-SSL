@@ -54,7 +54,7 @@ parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
 
 def main():
     args = parser.parse_args()
-    assert args.n_views == 2, "Only two view training is supported. Please use --n-views 2."
+    # assert args.n_views == 2, "Only two view training is supported. Please use --n-views 2."
     # check if gpu training is available
     if not args.disable_cuda and torch.cuda.is_available():
         args.device = torch.device('cuda')
@@ -64,6 +64,7 @@ def main():
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
+    # TODO: change
     dataset = ContrastiveLearningDataset(args.data)
 
     train_dataset = dataset.get_dataset(args.dataset_name, args.n_views)
