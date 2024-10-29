@@ -5,16 +5,15 @@ from torchvision import models
 from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset
 from models.resnet_simclr import ResNetSimCLR
 from simclr import SimCLR
+from datasets.tf_idf import ScoreDatasetGenerator
+from datasets.flight_score_dataset import ScorePairDataset
+from sample_flights.combine_flight_data import flight_paths
 
 model_names = sorted(name for name in models.__dict__
                      if name.islower() and not name.startswith("__")
                      and callable(models.__dict__[name]))
 
 parser = argparse.ArgumentParser(description='PyTorch SimCLR')
-parser.add_argument('-data', metavar='DIR', default='./datasets',
-                    help='path to dataset')
-parser.add_argument('-dataset-name', default='stl10',
-                    help='dataset name', choices=['stl10', 'cifar10'])
 parser.add_argument('-a', '--arch', metavar='ARCH', default='resnet18',
                     choices=model_names,
                     help='model architecture: ' +
@@ -49,8 +48,14 @@ parser.add_argument('--temperature', default=0.07, type=float,
                     help='softmax temperature (default: 0.07)')
 parser.add_argument('--n-views', default=2, type=int, metavar='N',
                     help='Number of views for contrastive learning training.')
-parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
+# parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
 
+def dataloader_function(batch):
+    first_elements, second_elements = zip(*batch)
+    batch_combined = first_elements + second_elements
+    batch_combined = torch.stack(batch_combined, dim=0)
+
+    return batch_combined
 
 def main():
     args = parser.parse_args()
@@ -64,26 +69,81 @@ def main():
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
-    # TODO: change
-    dataset = ContrastiveLearningDataset(args.data)
+    score_generator = ScoreDatasetGenerator()
+    
+    non_zero_pairs = score_generator.pair_generator(non_zero=True)
+    all_pairs = score_generator.pair_generator(non_zero=False)
+    flight_id_to_paths = flight_paths()
+    dataset = ScorePairDataset(all_pairs, flight_id_to_paths)
+    train_set = dataset
+    # dataset_size = len(dataset)
+    # train_data_size = int(dataset_size * .7)
+    # test_data_size = int(dataset_size * .2)
+    # val_data_size = train_data_size - test_data_size
+    
+    batch_size = 1
+    num_workers = 0
+    # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 
-    train_dataset = dataset.get_dataset(args.dataset_name, args.n_views)
-
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True, drop_last=True)
-
+    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True,
+        num_workers=num_workers, pin_memory=True, drop_last=True, collate_fn=dataloader_function)
+    # test_loader = torch.utils.data.DataLoader(test_set, batch_size=args.batch_size, shuffle=True,
+    #     num_workers=args.workers, pin_memory=True, drop_last=True)
+    # val_loader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=True,
+    #     num_workers=args.workers, pin_memory=True, drop_last=True)
+    
+    
     model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
 
     optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0,
                                                            last_epoch=-1)
-
-    #  It’s a no-op if the 'gpu_index' argument is a negative integer or None.
+    
     with torch.cuda.device(args.gpu_index):
         simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
         simclr.train(train_loader)
+
+
+
+
+
+
+
+
+# def old():
+#     args = parser.parse_args()
+#     # assert args.n_views == 2, "Only two view training is supported. Please use --n-views 2."
+#     # check if gpu training is available
+#     if not args.disable_cuda and torch.cuda.is_available():
+#         args.device = torch.device('cuda')
+#         cudnn.deterministic = True
+#         cudnn.benchmark = True
+#     else:
+#         args.device = torch.device('cpu')
+#         args.gpu_index = -1
+
+#     # TODO: change
+    
+#     dataset = ContrastiveLearningDataset(args.data)
+
+#     train_dataset = dataset.get_dataset(args.dataset_name, args.n_views)
+
+#     train_loader = torch.utils.data.DataLoader(
+#         train_dataset, batch_size=args.batch_size, shuffle=True,
+#         num_workers=args.workers, pin_memory=True, drop_last=True)
+
+#     model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+
+#     optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
+
+#     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0,
+#                                                            last_epoch=-1)
+
+#     #  It’s a no-op if the 'gpu_index' argument is a negative integer or None.
+#     with torch.cuda.device(args.gpu_index):
+#         simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+#         simclr.train(train_loader)
 
 
 if __name__ == "__main__":

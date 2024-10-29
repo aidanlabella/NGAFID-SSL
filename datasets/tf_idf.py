@@ -8,10 +8,14 @@ import matplotlib.pyplot as plt
 
 import math
 
-CSV_FILE = "events.csv"
-FLIGHT_ID_FILE = "flight_ids.csv"
+# CSV_FILE = "events.csv"
+# FLIGHT_ID_FILE = "flight_ids.csv"
+# NUM_FLIGHTS = 7679
 
-NUM_FLIGHTS = 7679
+CSV_FILE = "datasets/events_small.csv"
+FLIGHT_ID_FILE = "datasets/flight_ids_small.csv"
+
+NUM_FLIGHTS = 5
 
 class ScoreDatasetGenerator():
   def __init__(self):
@@ -40,9 +44,9 @@ class ScoreDatasetGenerator():
       flights_tfidf.append([flight_id, tf_idf])
 
     flights_tfidf = pd.DataFrame(flights_tfidf, columns=['flight_id', 'tfidf'])
-
     self.scores = pd.merge(self.flight_ids, flights_tfidf, on='flight_id', how='left')
     self.scores['tfidf'] = self.scores['tfidf'].fillna(0)
+    print(self.scores)
 
   def plot_non_zero_scores(self):
     sns.histplot(self.scores[self.scores['tfidf'] > 0]['tfidf'], kde=True)
@@ -61,24 +65,19 @@ class ScoreDatasetGenerator():
     plt.close()
 
   def pair_generator(self, non_zero=False):
-    data = self.scores['tfidf']
+    data = self.scores
     if non_zero:
-      data = self.scores[self.scores['tfidf'] > 0]['tfidf']
+      data = self.scores[self.scores['tfidf'] > 0]
 
-    data = data.sort_values()
-    pairs = [(data.index[i], data.index[i+1]) for i in range(0,len(data)-1, 2)]
+    data = data.sort_values(by="tfidf").reset_index(drop=True)
+    pairs = [(data['flight_id'][i], data['flight_id'][i+1]) for i in range(0,len(data)-1, 2)]
     
     pair_df = pd.DataFrame(
       {
         "Positive Pairs": pairs
       }
     )
-
     return pair_df    
 
-
-s = ScoreDatasetGenerator()
-pairs = s.pair_generator(True)
-print(pairs)
-
-
+# s = ScoreDatasetGenerator()
+# print(s.pair_generator())

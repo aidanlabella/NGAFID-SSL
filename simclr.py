@@ -56,7 +56,7 @@ class SimCLR(object):
 
     def train(self, train_loader):
 
-        scaler = GradScaler(enabled=self.args.fp16_precision)
+        scaler = torch.amp.GradScaler(enabled=self.args.fp16_precision)
 
         # save config file
         save_config_file(self.writer.log_dir, self.args)
@@ -66,9 +66,15 @@ class SimCLR(object):
         logging.info(f"Training with gpu: {self.args.disable_cuda}.")
 
         for epoch_counter in range(self.args.epochs):
-            for images, _ in tqdm(train_loader):
-                images = torch.cat(images, dim=0)
 
+            loss = torch.tensor(0.0, device=self.args.device)
+            top1, top5 = torch.tensor([0.0], device=self.args.device), torch.tensor([0.0], device=self.args.device)
+            
+            for images in tqdm(train_loader):
+
+                # images = torch.cat(images, dim=0)
+                print(images)
+                
                 images = images.to(self.args.device)
 
                 with autocast(enabled=self.args.fp16_precision):
