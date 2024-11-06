@@ -1,1 +1,13 @@
 env/
+runs/
+.venv/
+exceptions/
+models/__pycache__
+src/
+sample_flights/
+datasets/__pycache__
+data_aug/__pycache__
+requirements.txt
+sample_flights/Cessna_172S_flight_7.xlsx
+env.yml
+__pycache__/
