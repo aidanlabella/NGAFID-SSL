@@ -28,3 +28,6 @@ class ResNetSimCLR(nn.Module):
 
     def forward(self, x):
         return self.backbone(x)
+
+    def remove_projector(self):
+        self.backbone.fc = nn.Identity()  
