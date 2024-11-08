@@ -24,7 +24,6 @@ class SimCLR(object):
         self.criterion = torch.nn.CrossEntropyLoss().to(self.args.device)
 
     def info_nce_loss(self, features):
-
         labels = torch.cat([torch.arange(self.args.batch_size) for i in range(self.args.n_views)], dim=0)
         labels = (labels.unsqueeze(0) == labels.unsqueeze(1)).float()
         labels = labels.to(self.args.device)
@@ -73,10 +72,8 @@ class SimCLR(object):
             for images in tqdm(train_loader):
 
                 # images = torch.cat(images, dim=0)
-                print(images)
                 
                 images = images.to(self.args.device)
-
                 with autocast(enabled=self.args.fp16_precision):
                     features = self.model(images)
                     logits, labels = self.info_nce_loss(features)

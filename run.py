@@ -1,6 +1,8 @@
 import argparse
 import torch
 import torch.backends.cudnn as cudnn
+import pandas as pd
+
 from torchvision import models
 from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset
 from models.resnet_simclr import ResNetSimCLR
@@ -8,6 +10,8 @@ from simclr import SimCLR
 from datasets.tf_idf import ScoreDatasetGenerator
 from datasets.flight_score_dataset import ScorePairDataset
 from sample_flights.combine_flight_data import flight_paths
+
+SS_PATH = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flight_safety_scores.csv"
 
 model_names = sorted(name for name in models.__dict__
                      if name.islower() and not name.startswith("__")
@@ -57,6 +61,30 @@ def dataloader_function(batch):
 
     return batch_combined
 
+def get_pos_pairs(non_zero=False):
+    scores = pd.read_csv(SS_PATH, index_col='flight_id')
+    flights_df = flight_paths()
+
+    if non_zero:
+      scores = scores[scores['tfidf'] > 0]
+
+    merged_flights = pd.merge(scores, flights_df, on='flight_id', how='inner')
+
+    data = merged_flights
+
+    data = data.sort_values(by="tfidf").reset_index(drop=False)
+    pairs = [(data['flight_id'][i], data['flight_id'][i+1]) for i in range(0,len(data)-1, 2)]
+    
+    pair_df = pd.DataFrame(
+      {
+        "Positive Pairs": pairs
+      }
+    )
+
+    return pair_df    
+
+
+
 def main():
     args = parser.parse_args()
     # assert args.n_views == 2, "Only two view training is supported. Please use --n-views 2."
@@ -65,23 +93,32 @@ def main():
         args.device = torch.device('cuda')
         cudnn.deterministic = True
         cudnn.benchmark = True
+        args.gpu_index = 1
     else:
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
-    score_generator = ScoreDatasetGenerator()
+    args.device = torch.device('cuda:1')
+
+    # score_generator = ScoreDatasetGenerator()
+
+    all_pairs = get_pos_pairs()
+    non_zero_pairs = get_pos_pairs(non_zero=False)
     
-    non_zero_pairs = score_generator.pair_generator(non_zero=True)
-    all_pairs = score_generator.pair_generator(non_zero=False)
     flight_id_to_paths = flight_paths()
+
+    flight = pd.read_csv(flight_id_to_paths['file_path'][951])
+    flight = flight.iloc[:, 2:]
+
     dataset = ScorePairDataset(all_pairs, flight_id_to_paths)
+
     train_set = dataset
-    # dataset_size = len(dataset)
+
     # train_data_size = int(dataset_size * .7)
     # test_data_size = int(dataset_size * .2)
     # val_data_size = train_data_size - test_data_size
     
-    batch_size = 1
+    batch_size = 16
     num_workers = 0
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 
@@ -100,6 +137,7 @@ def main():
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0,
                                                            last_epoch=-1)
     
+    args.batch_size = batch_size
     with torch.cuda.device(args.gpu_index):
         simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
         simclr.train(train_loader)

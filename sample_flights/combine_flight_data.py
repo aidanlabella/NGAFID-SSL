@@ -2,7 +2,7 @@ import pandas as pd
 import glob
 import os
 
-DIR_PATH = 'sample_flights'
+DIR_PATH = '/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flights'
 
 def flight_paths():
 
@@ -23,7 +23,7 @@ def flight_paths():
 
     combined_df = pd.DataFrame.from_dict(data, orient='index', columns=['file_path'])
 
-    combined_df.index.name = 'index'
+    combined_df.index.name = 'flight_id'
 
     return combined_df
 

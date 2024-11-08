@@ -6,22 +6,32 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+# from ../sample_flights.combine_flight_data import flight_paths
+#
 import math
+import glob
+import os
 
 # CSV_FILE = "events.csv"
 # FLIGHT_ID_FILE = "flight_ids.csv"
 # NUM_FLIGHTS = 7679
 
-CSV_FILE = "datasets/events_small.csv"
-FLIGHT_ID_FILE = "datasets/flight_ids_small.csv"
+CSV_FILE = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/events/all_events.csv"
+FLIGHTS_PATH = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flights"
+FLIGHT_ID_FILE = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flight_ids.csv"
 
-NUM_FLIGHTS = 5
+
+FLIGHTS = glob.glob(os.path.join(FLIGHTS_PATH, "*.csv"))
+
 
 class ScoreDatasetGenerator():
   def __init__(self):
     self.events = pd.read_csv(CSV_FILE)
     self.flight_ids = pd.read_csv(FLIGHT_ID_FILE)
     self.scores = None
+
+    self.num_flights = len(self.flight_ids)
+
     self.get_scores()
       
   def get_scores(self):
@@ -38,7 +48,7 @@ class ScoreDatasetGenerator():
         event = row["name"]
         tf = row["counts"]
         flights_u_event = event_flight_counts[event]
-        idf = math.log10(NUM_FLIGHTS/flights_u_event)
+        idf = math.log10(self.num_flights/flights_u_event)
         tf_idf += tf*idf
 
       flights_tfidf.append([flight_id, tf_idf])
@@ -46,7 +56,8 @@ class ScoreDatasetGenerator():
     flights_tfidf = pd.DataFrame(flights_tfidf, columns=['flight_id', 'tfidf'])
     self.scores = pd.merge(self.flight_ids, flights_tfidf, on='flight_id', how='left')
     self.scores['tfidf'] = self.scores['tfidf'].fillna(0)
-    print(self.scores)
+
+    self.scores.to_csv("/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flight_safety_scores.csv", index=False)
 
   def plot_non_zero_scores(self):
     sns.histplot(self.scores[self.scores['tfidf'] > 0]['tfidf'], kde=True)
