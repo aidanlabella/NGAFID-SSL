@@ -66,8 +66,8 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
             "explained variance ratio (first two components): %s"
             % str(pca.explained_variance_ratio_)
         )
-        graph2(flight_data, 'PC1', 'PC2', 'tfidf')
-        graph2(flight_data, 'PC1', 'PC2', 'aircraft_type')
+        graph2(flight_data, 'PC1', 'PC2', 'tfidf', 'PCA')
+        graph2(flight_data, 'PC1', 'PC2', 'aircraft_type', 'PCA')
     
     if "TSNE" in dr_methods:
         normalized_embeddings = StandardScaler().fit_transform(embeddings)
@@ -76,8 +76,8 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
         components = tsne.fit_transform(normalized_embeddings)
         flight_data['Dim1'] = components[:, 0]
         flight_data['Dim2'] = components[:, 1]
-        graph2(flight_data, 'Dim1', 'Dim2', 'tfidf')
-        graph2(flight_data, 'Dim1', 'Dim2', 'aircraft_type')
+        graph2(flight_data, 'Dim1', 'Dim2', 'tfidf', 'TSNE')
+        graph2(flight_data, 'Dim1', 'Dim2', 'aircraft_type', 'TSNE')
 
 
     
@@ -136,7 +136,7 @@ def graph2(df, pc1_col, pc2_col, hue_col, dr_type):
             c=df[hue_col],
             cmap='viridis',
             alpha=0.7,
-            s=50
+            s=30
         )
         cbar = plt.colorbar(scatter)
         cbar.set_label(hue_col)
@@ -148,7 +148,7 @@ def graph2(df, pc1_col, pc2_col, hue_col, dr_type):
             hue=hue_col,  
             palette='Set1',
             alpha=0.7,
-            s=50
+            s=30
         )
         plt.legend(title=hue_col, bbox_to_anchor=(1.05, 1), loc='upper left')
     
