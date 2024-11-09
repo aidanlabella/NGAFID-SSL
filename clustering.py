@@ -107,25 +107,6 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
     #     # graph aircraft types
     #     # graph(X_r, aircraft_labels, ["aircraft 1","aircraft 2","aircraft 3",], "aircraft type")
     
-    
-   
-def graph(X_r, y, label_names, label_type):
-    plt.figure()
-    num_labels = len(label_names)
-    colors_options = plt.cm.get_cmap('tab20', num_labels)
-    colors = [colors(i) for i in range(num_labels)]
-    lw = 2
-
-    for color, i, target_name in zip(colors, torch.arrange(num_labels), label_names):
-        plt.scatter(
-            X_r[y == i, 0], X_r[y == i, 1], color=color, alpha=0.8, lw=lw, label=target_name
-        )
-    plt.legend(loc="best", shadow=False, scatterpoints=1)
-    plt.title("PCA of NGAFID dataset: " + label_type)
-    plt.show()
-
-
-
 def graph2(df, pc1_col, pc2_col, hue_col, dr_type):
     plt.figure(figsize=(10, 8))
 
@@ -156,3 +137,21 @@ def graph2(df, pc1_col, pc2_col, hue_col, dr_type):
     plt.xlabel(pc1_col)
     plt.ylabel(pc2_col)
     plt.show()
+    
+   
+def graph(X_r, y, label_names, label_type):
+    plt.figure()
+    num_labels = len(label_names)
+    colors_options = plt.cm.get_cmap('tab20', num_labels)
+    colors = [colors(i) for i in range(num_labels)]
+    lw = 2
+
+    for color, i, target_name in zip(colors, torch.arrange(num_labels), label_names):
+        plt.scatter(
+            X_r[y == i, 0], X_r[y == i, 1], color=color, alpha=0.8, lw=lw, label=target_name
+        )
+    plt.legend(loc="best", shadow=False, scatterpoints=1)
+    plt.title("PCA of NGAFID dataset: " + label_type)
+    plt.show()
+
+
