@@ -13,6 +13,7 @@ from datasets.tf_idf import ScoreDatasetGenerator
 from datasets.flight_score_dataset import ScorePairDataset
 from sample_flights.combine_flight_data import flight_paths
 from datasets.default_iteration_dataset import DefaultIterationDataset
+from clustering import visualize
 
 
 SS_PATH = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flight_safety_scores.csv"
@@ -168,8 +169,8 @@ def main():
         simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
         simclr.train(train_loader, wandb)
 
-    
-    
+    visualize(simclr, args, visualization_loader, ["PCA", "TSNE"])
+
 
 
 
