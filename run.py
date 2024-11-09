@@ -12,6 +12,8 @@ from simclr import SimCLR
 from datasets.tf_idf import ScoreDatasetGenerator
 from datasets.flight_score_dataset import ScorePairDataset
 from sample_flights.combine_flight_data import flight_paths
+from datasets.default_iteration_dataset import DefaultIterationDataset
+
 
 SS_PATH = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flight_safety_scores.csv"
 
@@ -132,6 +134,8 @@ def main():
 
     dataset = ScorePairDataset(all_pairs, flight_id_to_paths)
 
+    visualization_dataset = DefaultIterationDataset(flight_id_topath=flight_id_to_paths)
+
     train_set = dataset
 
     # train_data_size = int(dataset_size * .7)
@@ -148,6 +152,8 @@ def main():
     #     num_workers=args.workers, pin_memory=True, drop_last=True)
     # val_loader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=True,
     #     num_workers=args.workers, pin_memory=True, drop_last=True)
+    visualization_loader = torch.utils.data.DataLoader(visualization_dataset, batch_size=batch_size, shuffle=True,
+        num_workers=num_workers, pin_memory=True, drop_last=True, collate_fn=dataloader_function)
     
     
     model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
@@ -162,6 +168,8 @@ def main():
         simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
         simclr.train(train_loader, wandb)
 
+    
+    
 
 
 
