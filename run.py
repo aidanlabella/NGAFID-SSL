@@ -2,6 +2,7 @@ import argparse
 import torch
 import torch.backends.cudnn as cudnn
 import pandas as pd
+import wandb
 
 from torchvision import models
 from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset
@@ -100,6 +101,17 @@ def main():
 
     args.device = torch.device('cuda:1')
 
+    wandb.init(
+        # set the wandb project where this run will be logged
+        project="ngafid-ssl-fall-24",
+
+        # track hyperparameters and run metadata
+        config={
+            'learning_rate': args.lr,
+            'epochs': args.epochs,
+        }
+    )
+
     # score_generator = ScoreDatasetGenerator()
 
     all_pairs = get_pos_pairs()
@@ -140,7 +152,7 @@ def main():
     args.batch_size = batch_size
     with torch.cuda.device(args.gpu_index):
         simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-        simclr.train(train_loader)
+        simclr.train(train_loader, wandb)
 
 
 

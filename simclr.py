@@ -53,7 +53,7 @@ class SimCLR(object):
         logits = logits / self.args.temperature
         return logits, labels
 
-    def train(self, train_loader):
+    def train(self, train_loader, wandb):
 
         scaler = torch.amp.GradScaler(enabled=self.args.fp16_precision)
 
@@ -99,6 +99,12 @@ class SimCLR(object):
             if epoch_counter >= 10:
                 self.scheduler.step()
             logging.debug(f"Epoch: {epoch_counter}\tLoss: {loss}\tTop1 accuracy: {top1[0]}")
+
+            wandb.log({
+                'epoch': epoch_counter,
+                'loss': loss,
+                'accuracy': top1[0]
+            })
 
         logging.info("Training has finished.")
         # save model checkpoints
