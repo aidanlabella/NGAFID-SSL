@@ -4,6 +4,7 @@ import torch.backends.cudnn as cudnn
 import pandas as pd
 import wandb
 
+from datetime import datetime
 from torchvision import models
 from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset
 from models.resnet_simclr import ResNetSimCLR
@@ -104,6 +105,8 @@ def main():
     wandb.init(
         # set the wandb project where this run will be logged
         project="ngafid-ssl-fall-24",
+        entity="ngafid-ssl",
+        name=f"{args.epochs} epochs.",
 
         # track hyperparameters and run metadata
         config={
@@ -111,6 +114,11 @@ def main():
             'epochs': args.epochs,
         }
     )
+
+    # run_id = f"{datetime.now():%Y-%m-%d}"
+    # wapi = wandb.Api()
+    # run = wapi.run(f"ngafid-ssl/ngafid-ssl-fall-24/{run_id}")
+    # run.update()
 
     # score_generator = ScoreDatasetGenerator()
 
