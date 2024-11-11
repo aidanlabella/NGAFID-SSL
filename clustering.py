@@ -138,6 +138,7 @@ def graph2(df, pc1_col, pc2_col, hue_col, dr_type):
     plt.title(dr_type + " of SSL Representations")
     plt.xlabel(pc1_col)
     plt.ylabel(pc2_col)
+    plt.tight_layout()
     plt.show()
     
    
@@ -154,6 +155,7 @@ def graph(X_r, y, label_names, label_type):
         )
     plt.legend(loc="best", shadow=False, scatterpoints=1)
     plt.title("PCA of NGAFID dataset: " + label_type)
+    plt.tight_layout()
     plt.show()
 
 

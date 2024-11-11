@@ -131,14 +131,15 @@ def main():
     # score_generator = ScoreDatasetGenerator()
 
     all_pairs = get_pos_pairs()
-    non_zero_pairs = get_pos_pairs(non_zero=False)
+    non_zero_pairs = get_pos_pairs(non_zero=True)
     
     flight_id_to_paths = flight_paths()
 
     flight = pd.read_csv(flight_id_to_paths['file_path'][951])
     flight = flight.iloc[:, 2:]
 
-    dataset = ScorePairDataset(all_pairs, flight_id_to_paths)
+    # dataset = ScorePairDataset(all_pairs, flight_id_to_paths)
+    dataset = ScorePairDataset(non_zero_pairs, flight_id_to_paths)
 
     visualization_dataset = DefaultIterationDataset(flight_id_topath=flight_id_to_paths)
 
@@ -148,7 +149,7 @@ def main():
     # test_data_size = int(dataset_size * .2)
     # val_data_size = train_data_size - test_data_size
     
-    batch_size = 128
+    batch_size = 16
     num_workers = 0
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 
