@@ -49,6 +49,11 @@ parser.add_argument('--disable-cuda', action='store_true',
 parser.add_argument('--fp16-precision', action='store_true',
                     help='Whether or not to use 16-bit precision GPU training.')
 
+parser.add_argument('--inference', action='store_true',
+                    help='Whether or not to do inference or training')
+
+parser.add_argument('--parameters', default=None, type=str, help='Parameter file')
+
 parser.add_argument('--out_dim', default=128, type=int,
                     help='feature dimension (default: 128)')
 parser.add_argument('--log-every-n-steps', default=100, type=int,
@@ -143,31 +148,52 @@ def main():
     # test_data_size = int(dataset_size * .2)
     # val_data_size = train_data_size - test_data_size
     
-    batch_size = 16
+    batch_size = 128
     num_workers = 0
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 
-    train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True,
-        num_workers=num_workers, pin_memory=True, drop_last=True, collate_fn=dataloader_function)
-    # test_loader = torch.utils.data.DataLoader(test_set, batch_size=args.batch_size, shuffle=True,
-    #     num_workers=args.workers, pin_memory=True, drop_last=True)
-    # val_loader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=True,
-    #     num_workers=args.workers, pin_memory=True, drop_last=True)
-    visualization_loader = torch.utils.data.DataLoader(visualization_dataset, batch_size=batch_size, shuffle=True,
-        num_workers=num_workers, pin_memory=True, drop_last=True, collate_fn=dataloader_function)
-    
-    
-    model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+    if args.inference:
+        model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
 
-    optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
+        state_dict = torch.load(args.parameters, map_location=args.device)
+        model.load_state_dict(state_dict['state_dict'])
+        
+        args.batch_size = batch_size
 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0,
-                                                           last_epoch=-1)
-    
-    args.batch_size = batch_size
-    with torch.cuda.device(args.gpu_index):
-        simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
-        simclr.train(train_loader, wandb)
+        with torch.cuda.device(args.gpu_index):
+            visualization_loader = torch.utils.data.DataLoader(visualization_dataset, batch_size=batch_size, shuffle=True,
+                                num_workers=num_workers, pin_memory=True, drop_last=True)
+
+            optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(visualization_loader), eta_min=0, last_epoch=-1)
+
+
+
+            simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+            print("Trying to visualize!")
+            visualize(model, args, visualization_loader, ["PCA", "TSNE"])
+
+    else:
+        train_loader = torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True,
+            num_workers=num_workers, pin_memory=True, drop_last=True, collate_fn=dataloader_function)
+        # test_loader = torch.utils.data.DataLoader(test_set, batch_size=args.batch_size, shuffle=True,
+        #     num_workers=args.workers, pin_memory=True, drop_last=True)
+        # val_loader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=True,
+        #     num_workers=args.workers, pin_memory=True, drop_last=True)
+        visualization_loader = torch.utils.data.DataLoader(visualization_dataset, batch_size=batch_size, shuffle=True,
+            num_workers=num_workers, pin_memory=True, drop_last=True, collate_fn=dataloader_function)
+        
+        
+        model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+
+        optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
+
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=len(train_loader), eta_min=0, last_epoch=-1)
+        
+        args.batch_size = batch_size
+        with torch.cuda.device(args.gpu_index):
+            simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
+            simclr.train(train_loader, wandb)
 
     visualize(simclr, args, visualization_loader, ["PCA", "TSNE"])
 

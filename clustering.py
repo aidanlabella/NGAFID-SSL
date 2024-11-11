@@ -28,10 +28,12 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
 
     X = []
     ids = []
+
+    model.remove_projector()
     model.eval()
 
     with torch.no_grad():  
-        for images, flight_ids in tqdm(dataloader):
+        for images, flight_ids in dataloader:
             images = images.to(args.device)
             with autocast(enabled=args.fp16_precision):
                 batch_features = model(images)  
@@ -41,7 +43,7 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
     X = torch.cat(X, dim=0).numpy()
     ids = torch.cat(ids, dim=0).numpy()
 
-    flight_data = pd.Dataframe({
+    flight_data = pd.DataFrame({
         'embedding': list(X),
         'flight_id': ids
     })

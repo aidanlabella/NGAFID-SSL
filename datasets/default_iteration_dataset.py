@@ -15,6 +15,7 @@ class DefaultIterationDataset(Dataset):
 
         flight = pd.read_csv(path, na_values=[' NaN', 'NaN', 'NaN '])
         flight = torch.tensor(flight.to_numpy(), dtype=torch.float32)        
+        flight = flight.unsqueeze(dim=0)
 
         return flight, flight_id
 
