@@ -1,0 +1,13 @@
+name: ngafid-ssl
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pandas
+  - pyyaml
+  - scikit-learn
+  - pytorch
+  - einops
+  - ipykernel
+  - tqdm
+prefix: /home/aidan/.conda/envs/ngafid-ssl
