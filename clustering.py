@@ -51,6 +51,8 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
     aircraft_types = pd.read_csv(AT_PATH)
     flight_data = flight_data.merge(safety_scores, on='flight_id', how='inner').merge(aircraft_types, on='flight_id', how='inner')
 
+    flight_data = flight_data[flight_data['tfidf'] > 0]
+
     # form numpy array of (#flights, embedding_size)
     embeddings = np.stack(flight_data['embedding'].values)
   
