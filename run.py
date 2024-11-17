@@ -108,7 +108,7 @@ def main():
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
-    args.device = torch.device('cuda:0')
+    args.device = torch.device('cuda:1')
 
     wandb.init(
         # set the wandb project where this run will be logged

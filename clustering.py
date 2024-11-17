@@ -50,7 +50,7 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
     safety_scores = pd.read_csv(SS_PATH)
     aircraft_types = pd.read_csv(AT_PATH)
     flight_data = flight_data.merge(safety_scores, on='flight_id', how='inner').merge(aircraft_types, on='flight_id', how='inner')
-    flight_data.to_csv("~/data/ngafid/infer_data.csv")
+    flight_data.to_csv("~/data/ngafid/infer_data_nonzero.csv")
     print("Saved CSV")
 
     # flight_data = flight_data[flight_data['tfidf'] > 0]
