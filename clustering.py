@@ -50,8 +50,10 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
     safety_scores = pd.read_csv(SS_PATH)
     aircraft_types = pd.read_csv(AT_PATH)
     flight_data = flight_data.merge(safety_scores, on='flight_id', how='inner').merge(aircraft_types, on='flight_id', how='inner')
+    flight_data.to_csv("~/data/ngafid/infer_data.csv")
+    print("Saved CSV")
 
-    flight_data = flight_data[flight_data['tfidf'] > 0]
+    # flight_data = flight_data[flight_data['tfidf'] > 0]
 
     # form numpy array of (#flights, embedding_size)
     embeddings = np.stack(flight_data['embedding'].values)
@@ -82,6 +84,20 @@ def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):
         flight_data['Dim2'] = components[:, 1]
         graph2(flight_data, 'Dim1', 'Dim2', 'tfidf', 'TSNE')
         graph2(flight_data, 'Dim1', 'Dim2', 'aircraft_type', 'TSNE')
+
+        zero = flight_data[flight_data['tfidf']==0]
+        pluszeroto2 = flight_data[(flight_data['tfidf']>0) and (flight_data['tfidf']<2)]
+        pluszeroto10 = flight_data[(flight_data['tfidf']>0) and (flight_data['tfidf']<10)]
+        plus10to20 = flight_data[(flight_data['tfidf']>10) and (flight_data['tfidf']<20)]
+        plus20to40 = flight_data[(flight_data['tfidf']>20) and (flight_data['tfidf']<40)]
+        plus40to101 = flight_data[(flight_data['tfidf']>40) and (flight_data['tfidf']<101)]
+
+        graph2(zero, 'Dim1', 'Dim2', 'tfidf', 'TSNE')
+        graph2(pluszeroto2, 'Dim1', 'Dim2', 'tfidf', 'TSNE')
+        graph2(pluszeroto10, 'Dim1', 'Dim2', 'tfidf', 'TSNE')
+        graph2(plus10to20, 'Dim1', 'Dim2', 'tfidf', 'TSNE')
+        graph2(plus20to40, 'Dim1', 'Dim2', 'tfidf', 'TSNE')
+        graph2(plus40to101, 'Dim1', 'Dim2', 'tfidf', 'TSNE')
 
 
     

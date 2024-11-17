@@ -10,9 +10,10 @@ MAX_ROWS = 7289
 
 
 class ScorePairDataset(Dataset):
-    def __init__(self, pairs, flight_data=None):
+    def __init__(self, pairs, flight_data=None, use_1d: bool=False):
         self.pairs = pairs
         self.flight_data = flight_data
+        self.use_1d = use_1d
     
     def __len__(self):
         return len(self.pairs)
@@ -50,7 +51,12 @@ class ScorePairDataset(Dataset):
         #     t_2_padded = t_2
         #
 
-        flight_pair = (t_1.unsqueeze(dim=0), t_2.unsqueeze(dim=0))
+        breakpoint()
+
+        if self.use_1d:
+            flight_pair = (t_1.flatten(), t_2.flatten())
+        else:
+            flight_pair = (t_1.unsqueeze(dim=0), t_2.unsqueeze(dim=0))
 
         
 

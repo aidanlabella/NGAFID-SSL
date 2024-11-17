@@ -142,6 +142,7 @@ def main():
     dataset = ScorePairDataset(non_zero_pairs, flight_id_to_paths)
 
     visualization_dataset = DefaultIterationDataset(flight_id_topath=flight_id_to_paths)
+    # TODO: 0-10, 10-40, 40-100
 
     train_set = dataset
 
