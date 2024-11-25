@@ -8,6 +8,7 @@ from datetime import datetime
 from torchvision import models
 from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset
 from models.resnet_simclr import ResNetSimCLR
+from models.bert_simclr import BERTSimCLR
 from simclr import SimCLR
 from datasets.tf_idf import ScoreDatasetGenerator
 from datasets.flight_score_dataset import ScorePairDataset
@@ -109,6 +110,7 @@ def main():
         args.gpu_index = -1
 
     args.device = torch.device('cuda:1')
+    model = None
 
     wandb.init(
         # set the wandb project where this run will be logged
@@ -155,7 +157,8 @@ def main():
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 
     if args.inference:
-        model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+        # model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+        model = BERTSimCLR(out_dim=args.out_dim)
 
         state_dict = torch.load(args.parameters, map_location=args.device)
         model.load_state_dict(state_dict['state_dict'])
@@ -186,7 +189,8 @@ def main():
             num_workers=num_workers, pin_memory=True, drop_last=True, collate_fn=dataloader_function)
         
         
-        model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+        # model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+        model = BERTSimCLR(out_dim=args.out_dim)
 
         optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
 
@@ -197,7 +201,7 @@ def main():
             simclr = SimCLR(model=model, optimizer=optimizer, scheduler=scheduler, args=args)
             simclr.train(train_loader, wandb)
 
-    visualize(simclr, args, visualization_loader, ["PCA", "TSNE"])
+        visualize(model, args, visualization_loader, ["PCA", "TSNE"])
 
 
 
