@@ -51,7 +51,7 @@ class ScorePairDataset(Dataset):
         #     t_2_padded = t_2
         #
 
-        breakpoint()
+        # breakpoint()
 
         if self.use_1d:
             flight_pair = (t_1.flatten(), t_2.flatten())
