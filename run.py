@@ -152,7 +152,7 @@ def main():
     # test_data_size = int(dataset_size * .2)
     # val_data_size = train_data_size - test_data_size
     
-    batch_size = 16
+    batch_size = 1
     num_workers = 0
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 

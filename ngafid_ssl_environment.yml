@@ -6,8 +6,12 @@ dependencies:
   - pandas
   - pyyaml
   - scikit-learn
-  - pytorch
   - einops
   - ipykernel
   - tqdm
+  - transformers
+  - seaborn
+  - torchaudio
+  - pytorch
+  - torchvision
 prefix: /home/aidan/.conda/envs/ngafid-ssl
