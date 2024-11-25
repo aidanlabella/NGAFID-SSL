@@ -22,7 +22,7 @@ class BERTSimCLR(nn.Module):
         )
 
     def forward(self, input_data):
-
+        input_data = input_data.squeeze(1)
         batch_size, seq_len, _ = input_data.size()
         
         input_data_mapped = self.input_mapping(input_data)
