@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
-from transformers import BertModel
+from transformers import BertModel, AutoModel
 
 class BERTSimCLR(nn.Module):
     def __init__(self, out_dim, max_len=10000):
 
         super(BERTSimCLR, self).__init__()
         
-        self.bert = BertModel.from_pretrained("bert-base-uncased")
+        # self.bert = BertModel.from_pretrained("bert-base-uncased")
+        self.bert = AutoModel.from_pretrained("distilbert-base-uncased")
 
         self.bert.embeddings.position_embeddings = nn.Embedding(max_len, self.bert.config.hidden_size)
         self.bert.config.max_position_embeddings = max_len  
