@@ -14,6 +14,7 @@ from datasets.tf_idf import ScoreDatasetGenerator
 from datasets.flight_score_dataset import ScorePairDataset
 from sample_flights.combine_flight_data import flight_paths
 from datasets.default_iteration_dataset import DefaultIterationDataset
+from datasets.transformation_dataset import TransformationDataset
 from clustering import visualize
 
 
@@ -143,7 +144,9 @@ def main():
     # dataset = ScorePairDataset(all_pairs, flight_id_to_paths)
     dataset = ScorePairDataset(non_zero_pairs, flight_id_to_paths)
 
-    visualization_dataset = DefaultIterationDataset(flight_id_topath=flight_id_to_paths)
+    # visualization_dataset = DefaultIterationDataset(flight_id_topath=flight_id_to_paths)
+    visualization_dataset = TransformationDataset(flight_id_topath=flight_id_to_paths)
+
     # TODO: 0-10, 10-40, 40-100
 
     train_set = dataset
