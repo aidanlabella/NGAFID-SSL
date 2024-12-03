@@ -7,11 +7,11 @@ class BERTSimCLR(nn.Module):
 
         super(BERTSimCLR, self).__init__()
         
-        # self.bert = BertModel.from_pretrained("bert-base-uncased")
-        self.bert = AutoModel.from_pretrained("distilbert-base-uncased")
+        self.bert = BertModel.from_pretrained("bert-base-uncased")
+        # self.bert = AutoModel.from_pretrained("distilbert-base-uncased")
 
         self.bert.embeddings.position_embeddings = nn.Embedding(max_len, self.bert.config.hidden_size)
-        self.bert.config.max_position_embeddings = max_len  
+        self.bert.config.max_position_embeddings = max_len
 
         self.input_mapping = nn.Linear(44, self.bert.config.hidden_size)
 
