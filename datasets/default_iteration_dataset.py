@@ -12,8 +12,9 @@ class DefaultIterationDataset(Dataset):
     def __getitem__(self, index):
         path = self.flight_id_topath.loc[index, "file_path"]
         flight_id = self.flight_id_topath.loc[index, "flight_id"]
-
         flight = pd.read_csv(path, na_values=[' NaN', 'NaN', 'NaN '])
+        flight.ffill(inplace= True, axis="columns")
+        flight.bfill(inplace= True, axis="columns")
         flight = torch.tensor(flight.to_numpy(), dtype=torch.float32)        
         flight = flight.unsqueeze(dim=0)
 
