@@ -87,6 +87,8 @@ class TransformationDataset(Dataset):
     def __getitem__(self, index):
         path = self.flight_data.loc[index, "file_path"]
         flight = pd.read_csv(path, na_values=[' NaN', 'NaN', 'NaN '])
+        flight.ffill(inplace= True, axis="columns")
+        flight.bfill(inplace= True, axis="columns")
         flight = flight.to_numpy()
         flight_transformed = self.transformation(flight)
         flight = torch.tensor(flight, dtype=torch.float32)
