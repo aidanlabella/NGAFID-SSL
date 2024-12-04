@@ -61,6 +61,7 @@ class SimCLR(object):
         save_config_file(self.writer.log_dir, self.args)
 
         n_iter = 0
+        acc_steps = 4
         logging.info(f"Start SimCLR training for {self.args.epochs} epochs.")
         logging.info(f"Training with gpu: {self.args.disable_cuda}.")
 
@@ -69,7 +70,7 @@ class SimCLR(object):
             loss = torch.tensor(0.0, device=self.args.device)
             top1, top5 = torch.tensor([0.0], device=self.args.device), torch.tensor([0.0], device=self.args.device)
             
-            for images in tqdm(train_loader):
+            for i, images in enumerate(tqdm(train_loader)):
 
                 # images = torch.cat(images, dim=0)
                 
@@ -78,13 +79,16 @@ class SimCLR(object):
                     features = self.model(images)
                     logits, labels = self.info_nce_loss(features)
                     loss = self.criterion(logits, labels)
+                    loss = loss / acc_steps
 
-                self.optimizer.zero_grad()
 
                 scaler.scale(loss).backward()
 
-                scaler.step(self.optimizer)
-                scaler.update()
+                if (i + 1) % acc_steps == 0: 
+                    scaler.step(self.optimizer)
+                    scaler.update()
+                    self.optimizer.zero_grad()
+
 
                 if n_iter % self.args.log_every_n_steps == 0:
                     top1, top5 = accuracy(logits, labels, topk=(1, 5))

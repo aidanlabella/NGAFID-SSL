@@ -18,7 +18,7 @@ from datasets.transformation_dataset import TransformationDataset
 from clustering import visualize
 
 
-SS_PATH = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flight_safety_scores.csv"
+SS_PATH = "/oscar/data/sbach/bats/projects/ngafid/loci_dataset_fixed_keys/flight_safety_scores.csv"
 
 model_names = sorted(name for name in models.__dict__
                      if name.islower() and not name.startswith("__")
@@ -105,12 +105,14 @@ def main():
         args.device = torch.device('cuda')
         cudnn.deterministic = True
         cudnn.benchmark = True
-        args.gpu_index = 1
+        args.gpu_index = -1
+        # args.gpu_index = 0
     else:
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
-    args.device = torch.device('cuda:1')
+    # args.device = torch.device('cuda:0')
+    args.device = torch.device('cpu')
     model = None
 
     wandb.init(
@@ -155,8 +157,8 @@ def main():
     # test_data_size = int(dataset_size * .2)
     # val_data_size = train_data_size - test_data_size
     
-    batch_size = 1
-    num_workers = 0
+    batch_size = 5
+    num_workers = 8
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 
     if args.inference:

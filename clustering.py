@@ -10,8 +10,8 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-SS_PATH = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flight_safety_scores.csv"
-AT_PATH = "/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/aircraft_types.csv"
+SS_PATH = "/oscar/data/sbach/bats/projects/ngafid/exports/loci_dataset_fixed_keys/flight_safety_scores.csv"
+AT_PATH = "/oscar/data/sbach/bats/projects/ngafid/exports/loci_dataset_fixed_keys/aircraft_types.csv"
 
 
 def visualize(model, args, dataloader, dr_methods = ["PCA", "tSNE"]):

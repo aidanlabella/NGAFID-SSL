@@ -2,7 +2,7 @@ import pandas as pd
 import glob
 import os
 
-DIR_PATH = '/mnt/crucial/data/ngafid/exports/loci_dataset_fixed_keys/flights'
+DIR_PATH = '/oscar/data/sbach/bats/projects/ngafid/loci_dataset_fixed_keys/flights'
 
 def flight_paths():
 
