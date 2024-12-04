@@ -87,9 +87,9 @@ class TransformationDataset(Dataset):
     def __getitem__(self, index):
         path = self.flight_data.loc[index, "file_path"]
         flight = pd.read_csv(path, na_values=[' NaN', 'NaN', 'NaN '])
-        flight = torch.tensor(flight.to_numpy(), dtype=torch.float32)
+        flight = flight.to_numpy()
         flight_transformed = self.transformation(flight)
-
+        flight = torch.tensor(flight, dtype=torch.float32)
         pos_pair = (flight.unsqueeze(dim=0), flight_transformed.unsqueeze(dim=0))
         return pos_pair
 
