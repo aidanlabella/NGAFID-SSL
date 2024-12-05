@@ -65,6 +65,7 @@ parser.add_argument('--temperature', default=0.07, type=float,
 parser.add_argument('--n-views', default=2, type=int, metavar='N',
                     help='Number of views for contrastive learning training.')
 # parser.add_argument('--gpu-index', default=0, type=int, help='Gpu index.')
+parser.add_argument('--job-name', type=str, required=True, dest='job_name')
 
 def dataloader_function(batch):
     first_elements, second_elements = zip(*batch)
@@ -119,7 +120,7 @@ def main():
         # set the wandb project where this run will be logged
         project="ngafid-ssl-fall-24",
         entity="ngafid-ssl",
-        name=f"{args.epochs} epochs.",
+        name=args.job_name,
 
         # track hyperparameters and run metadata
         config={
@@ -157,7 +158,7 @@ def main():
     # val_data_size = train_data_size - test_data_size
     
     batch_size = 5
-    num_workers = 8
+    num_workers = 4
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 
     if args.inference:

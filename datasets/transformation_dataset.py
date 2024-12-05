@@ -85,12 +85,15 @@ class TransformationDataset(Dataset):
         return len(self.flight_id_topath)
     
     def __getitem__(self, index):
-        path = self.flight_data.loc[index, "file_path"]
+        path = self.flight_id_topath.loc[index, "file_path"]
         flight = pd.read_csv(path, na_values=[' NaN', 'NaN', 'NaN '])
-        flight.ffill(inplace= True, axis="columns")
-        flight.bfill(inplace= True, axis="columns")
+        flight_T = flight.T
+        flight_T.ffill(inplace= True, axis=0)
+        flight_T.bfill(inplace= True, axis=0)
+        flight = flight_T.T
         flight = flight.to_numpy()
         flight_transformed = self.transformation(flight)
+        flight_transformed = torch.tensor(flight_transformed, dtype=torch.float32)
         flight = torch.tensor(flight, dtype=torch.float32)
         pos_pair = (flight.unsqueeze(dim=0), flight_transformed.unsqueeze(dim=0))
         return pos_pair

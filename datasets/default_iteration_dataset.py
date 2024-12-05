@@ -13,8 +13,10 @@ class DefaultIterationDataset(Dataset):
         path = self.flight_id_topath.loc[index, "file_path"]
         flight_id = self.flight_id_topath.loc[index, "flight_id"]
         flight = pd.read_csv(path, na_values=[' NaN', 'NaN', 'NaN '])
-        flight.ffill(inplace= True, axis="columns")
-        flight.bfill(inplace= True, axis="columns")
+        flight_T = flight.T
+        flight_T.ffill(inplace= True, axis=0)
+        flight_T.bfill(inplace= True, axis=0)
+        flight = flight_T.T
         flight = torch.tensor(flight.to_numpy(), dtype=torch.float32)        
         flight = flight.unsqueeze(dim=0)
 
