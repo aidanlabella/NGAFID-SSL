@@ -9,6 +9,7 @@ from torchvision import models
 from data_aug.contrastive_learning_dataset import ContrastiveLearningDataset
 from models.resnet_simclr import ResNetSimCLR
 from models.bert_simclr import BERTSimCLR
+from models.albert_simclr import ALBERTSimCLR
 from simclr import SimCLR
 from datasets.tf_idf import ScoreDatasetGenerator
 from datasets.flight_score_dataset import ScorePairDataset
@@ -106,14 +107,14 @@ def main():
         args.device = torch.device('cuda')
         cudnn.deterministic = True
         cudnn.benchmark = True
-        args.gpu_index = -1
+        args.gpu_index = 1
         # args.gpu_index = 0
     else:
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
     # args.device = torch.device('cuda:0')
-    args.device = torch.device('cpu')
+    args.device = torch.device('cuda:1')
     model = None
 
     wandb.init(
@@ -163,7 +164,9 @@ def main():
 
     if args.inference:
         # model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
-        model = BERTSimCLR(out_dim=args.out_dim)
+        # model = BERTSimCLR(out_dim=args.out_dim)
+        model = ALBERTSimCLR(out_dim=args.out_dim)
+
 
         state_dict = torch.load(args.parameters, map_location=args.device)
         model.load_state_dict(state_dict['state_dict'])
@@ -195,7 +198,8 @@ def main():
         
         
         # model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
-        model = BERTSimCLR(out_dim=args.out_dim)
+        # model = BERTSimCLR(out_dim=args.out_dim)
+        model = ALBERTSimCLR(out_dim=args.out_dim)
 
         optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
 
