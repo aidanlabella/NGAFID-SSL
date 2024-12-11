@@ -19,7 +19,7 @@ from datasets.transformation_dataset import TransformationDataset
 from clustering import visualize
 
 
-SS_PATH = "/oscar/data/sbach/bats/projects/ngafid/loci_dataset_fixed_keys/flight_safety_scores.csv"
+SS_PATH = "/home/aidan/data/ngafid/exports/loci_dataset_fixed_keys/flight_safety_scores.csv"
 
 model_names = sorted(name for name in models.__dict__
                      if name.islower() and not name.startswith("__")
@@ -163,9 +163,9 @@ def main():
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 
     if args.inference:
-        # model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+        model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
         # model = BERTSimCLR(out_dim=args.out_dim)
-        model = ALBERTSimCLR(out_dim=args.out_dim)
+        # model = ALBERTSimCLR(out_dim=args.out_dim)
 
 
         state_dict = torch.load(args.parameters, map_location=args.device)
@@ -197,9 +197,9 @@ def main():
             num_workers=num_workers, pin_memory=True, drop_last=True, collate_fn=dataloader_function)
         
         
-        # model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
+        model = ResNetSimCLR(base_model=args.arch, out_dim=args.out_dim)
         # model = BERTSimCLR(out_dim=args.out_dim)
-        model = ALBERTSimCLR(out_dim=args.out_dim)
+        # model = ALBERTSimCLR(out_dim=args.out_dim)
 
         optimizer = torch.optim.Adam(model.parameters(), args.lr, weight_decay=args.weight_decay)
 
