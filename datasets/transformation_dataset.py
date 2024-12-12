@@ -8,7 +8,7 @@ def mask_transform(X,masking_ratio=0.15, mean_mask_length=3, mode='separate', di
     X = torch.from_numpy(X)
     mask = torch.from_numpy(mask)
     transformed_X = X * mask
-    return transformed_X
+    return X,transformed_X
 
 # from: https://github.dev/gzerveas/mvts_transformer
 def noise_mask(X, masking_ratio, lm, mode, distribution, exclude_feats):
@@ -76,8 +76,16 @@ def geom_noise_mask_single(L, lm, masking_ratio):
 
     return keep_mask
 
+def noise_transform(X, loc = 0, range = (0.1, 0.5)):
+    # normalize X column wise
+    X_standardized = (X - X.mean(axis=0)) / X.std(axis=0)
+    deviation = np.random.uniform(range[0], range[1])
+    noise = np.random.normal(loc, deviation, X.shape)
+    X_transformed = X_standardized + noise
+    return X_standardized, X_transformed
+
 class TransformationDataset(Dataset):
-    def __init__(self, flight_id_topath, transformation_method=mask_transform):
+    def __init__(self, flight_id_topath, transformation_method=noise_transform):
         self.flight_id_topath = flight_id_topath.reset_index()
         self.transformation = transformation_method
     
@@ -92,7 +100,7 @@ class TransformationDataset(Dataset):
         flight_T.bfill(inplace= True, axis=0)
         flight = flight_T.T
         flight = flight.to_numpy()
-        flight_transformed = self.transformation(flight)
+        flight, flight_transformed = self.transformation(flight)
         flight_transformed = torch.tensor(flight_transformed, dtype=torch.float32)
         flight = torch.tensor(flight, dtype=torch.float32)
         pos_pair = (flight.unsqueeze(dim=0), flight_transformed.unsqueeze(dim=0))
