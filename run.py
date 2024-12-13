@@ -15,7 +15,7 @@ from datasets.tf_idf import ScoreDatasetGenerator
 from datasets.flight_score_dataset import ScorePairDataset
 from sample_flights.combine_flight_data import flight_paths
 from datasets.default_iteration_dataset import DefaultIterationDataset
-from datasets.transformation_dataset import TransformationDataset
+from datasets.transformation_dataset import TransformationDataset, TransformationDatasetReverse
 from clustering import visualize
 
 
@@ -107,14 +107,14 @@ def main():
         args.device = torch.device('cuda')
         cudnn.deterministic = True
         cudnn.benchmark = True
-        args.gpu_index = 1
+        args.gpu_index = 0
         # args.gpu_index = 0
     else:
         args.device = torch.device('cpu')
         args.gpu_index = -1
 
     # args.device = torch.device('cuda:0')
-    args.device = torch.device('cuda:1')
+    args.device = torch.device('cuda:0')
     model = None
 
     wandb.init(
@@ -147,7 +147,7 @@ def main():
 
     # dataset = ScorePairDataset(all_pairs, flight_id_to_paths)
     # dataset = ScorePairDataset(non_zero_pairs, flight_id_to_paths)
-    dataset = TransformationDataset(flight_id_topath=flight_id_to_paths)
+    dataset = TransformationDatasetReverse(flight_id_topath=flight_id_to_paths, reverse_masked=False, reverse_original=False)
 
     visualization_dataset = DefaultIterationDataset(flight_id_topath=flight_id_to_paths)
     # TODO: 0-10, 10-40, 40-100
@@ -158,7 +158,7 @@ def main():
     # test_data_size = int(dataset_size * .2)
     # val_data_size = train_data_size - test_data_size
     
-    batch_size = 5
+    batch_size = 16
     num_workers = 4
     # train_set, test_set, val_set = torch.utils.data.random_split(dataset, [train_data_size, test_data_size, val_data_size])
 

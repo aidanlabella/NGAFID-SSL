@@ -3,7 +3,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 import numpy as np
 
-def mask_transform(X,masking_ratio=0.15, mean_mask_length=3, mode='separate', distribution='geometric', exclude_feats=None):
+def mask_transform(X,masking_ratio=0.6, mean_mask_length=3, mode='separate', distribution='geometric', exclude_feats=None):
     mask = noise_mask(X, masking_ratio, mean_mask_length, mode, distribution, exclude_feats)  # (seq_length, feat_dim) boolean array
     X = torch.from_numpy(X)
     mask = torch.from_numpy(mask)
@@ -78,10 +78,30 @@ def geom_noise_mask_single(L, lm, masking_ratio):
 
 def noise_transform(X, loc = 0, range = (0.1, 0.5)):
     # normalize X column wise
-    X_standardized = (X - X.mean(axis=0)) / X.std(axis=0)
+    # denom = X.std(axis=0)
+    # if 0 in denom:
+    #     X_standardized = (X - X.mean(axis=0)) / denom
+    #     deviation = np.random.uniform(range[0], range[1])
+    #     noise = np.random.normal(loc, deviation, X.shape)
+    #     X_transformed = X_standardized + noise
+    #     return X_standardized, X_transformed
+    # else:
+    #     return X, X
+    mean = X.mean(axis=0)
+    std_dev = X.std(axis=0)
+    
+    # Avoid division by zero by replacing 0 std_dev with 1 temporarily
+    std_dev_safe = np.where(std_dev == 0, 1, std_dev)
+    X_standardized = (X - mean) / std_dev_safe
+
+    # Generate noise
     deviation = np.random.uniform(range[0], range[1])
     noise = np.random.normal(loc, deviation, X.shape)
+    
+    # Add noise only to columns with non-zero std_dev
+    noise[:, std_dev == 0] = 0
     X_transformed = X_standardized + noise
+
     return X_standardized, X_transformed
 
 class TransformationDataset(Dataset):
@@ -104,5 +124,41 @@ class TransformationDataset(Dataset):
         flight_transformed = torch.tensor(flight_transformed, dtype=torch.float32)
         flight = torch.tensor(flight, dtype=torch.float32)
         pos_pair = (flight.unsqueeze(dim=0), flight_transformed.unsqueeze(dim=0))
+        return pos_pair
+
+class TransformationDatasetReverse(Dataset):
+    def __init__(self, flight_id_topath, transformation_method=noise_transform, reverse_masked=False, reverse_original=False):
+        self.flight_id_topath = flight_id_topath.reset_index()
+        self.transformation = transformation_method
+        self.reverse_masked = reverse_masked
+        self.reverse_original = reverse_original
+    
+    def __len__(self):
+        return len(self.flight_id_topath)
+    
+    def __getitem__(self, index):
+        path = self.flight_id_topath.loc[index, "file_path"]
+        flight = pd.read_csv(path, na_values=[' NaN', 'NaN', 'NaN '])
+        flight_T = flight.T
+        flight_T.ffill(inplace= True, axis=0)
+        flight_T.bfill(inplace= True, axis=0)
+        flight = flight_T.T
+        flight = flight.to_numpy()
+        flight, flight_transformed = self.transformation(flight)
+        flight = torch.tensor(flight, dtype=torch.float32)
+        flight_transformed = torch.tensor(flight_transformed, dtype=torch.float32)
+
+        if self.reverse_masked:
+            flight_transformed = torch.flip(flight_transformed, dims=[0])
+
+        if self.reverse_original:
+            flight = torch.flip(flight, dims=[0])
+
+        # print(flight.shape, flight_transformed.shape)
+
+    
+
+        pos_pair = (flight.unsqueeze(dim=0), flight_transformed.unsqueeze(dim=0))
+
         return pos_pair
 
