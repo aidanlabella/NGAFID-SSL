@@ -23,6 +23,7 @@
 * [Predictive Maintenance](https://arxiv.org/abs/2110.03757)
 * [Phase of Flight ID with SOMs](https://www.se.rit.edu/~travis/papers/2024_IEEE_WCCI_ms_som.pdf)
 * [(Class Paper) Noisy Timeseries SSL](https://arxiv.org/pdf/2112.10139)
+* [Guillotine Regularization](https://arxiv.org/abs/2206.13378)
 
 ## Installation
 
