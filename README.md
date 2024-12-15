@@ -38,7 +38,7 @@ To change running configurations, pass keyword arguments to the ```run.py``` fil
 
 ```python
 
-$ python run.py -data ./datasets --dataset-name stl10 --log-every-n-steps 100 --epochs 100 
+$ python run.py -data ./datasets --dataset-name NGAFID --log-every-n-steps 100 --epochs 100 
 
 ```
 To run on CPU use the ```--disable-cuda``` option.
