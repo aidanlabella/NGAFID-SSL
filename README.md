@@ -1,4 +1,6 @@
 # NGAFID-SSL: Self-Supervised Learning with General Aviation Data
+
+##Link to [paper](https://openreview.net/forum?id=6FcBsTcXVE)
 ## Team
 | Name       | Email              |
 |------------|--------------------|
